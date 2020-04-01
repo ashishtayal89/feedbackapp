@@ -28,15 +28,15 @@ To create a web application which will collect feedback for a product. This appl
 
 # App Tech
 
-## Google OAuth
+## Google OAuth(Express + MongoDB + PassportJS)
 
-## Payment Gateway
+## Payment Gateway(Stripe + MongoDB)
 
-## Campaign Creation
+## Campaign Creation(React + Redux)
 
-## Email Survey
+## Email Survey(Email Provider)
 
-## Tabulation and Report creation from survey
+## Tabulation and Report creation from survey(Email Provider + Express + Mongo + React + Redux)
 
 # Take Aways
 
