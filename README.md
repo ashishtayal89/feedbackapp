@@ -18,15 +18,25 @@ To create a web application which will collect feedback for a product. This appl
 
 # Diagram
 
-1. `01 > 001` : Application Use Case(Why the user(client) will use the application).
+1. `01 > 001` : Application Use Case(Who and why will use the application).
 
 2. `01 > 002` : Application flow(How user will use the application).Here the **user** is our client or the companies which will use our feedback management app. The **surveyes** are the end users of the product created by our client.
 
    > **NOTE**: **Users** are the users of the application. **Surveyes** are the end user or the customers of our app users.
 
-3. `01 > 003` : Tech stack
+3. `01 > 003` : Tech stack used at different levels in the app.
 
 # App Tech
+
+## Google OAuth
+
+## Payment Gateway
+
+## Campaign Creation
+
+## Email Survey
+
+## Tabulation and Report creation from survey
 
 # Take Aways
 
