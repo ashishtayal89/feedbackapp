@@ -20,6 +20,10 @@ To create a web application which will collect feedback for a product. This appl
 4. **Google**
    There may be a solution for your issue already answered on Github or StackOverflow
 
+# Imp Commands
+
+1. `cat package.json` : To open package.json
+
 # Diagram
 
 1. `01 > 001` : Application Use Case(Who and why will use the application).
