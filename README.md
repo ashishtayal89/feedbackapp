@@ -41,6 +41,8 @@ To create a web application which will collect feedback for a product. This appl
 
 ## Google OAuth(Express + MongoDB + PassportJS)
 
+### Architecture()
+
 ## Payment Gateway(Stripe + MongoDB)
 
 ## Campaign Creation(React + Redux)
@@ -53,7 +55,7 @@ To create a web application which will collect feedback for a product. This appl
 
 ## Heroku
 
-### Checklist :
+### Checklist(02 > 017)
 
 1. **PORT** : Heroku defines the port at which our application will be able to listen to the incoming request. To enable our application to be able to listen to that port we use `const PORT = process.env.PORT`. Heroku sets the PORT to our environment variable.
 
@@ -70,7 +72,7 @@ To create a web application which will collect feedback for a product. This appl
 
 4. **Remove intalled dependecies** : Add `node_modules` in .gitignore
 
-### Deployment
+### Deployment(02 > 016)
 
 #### First Time
 
@@ -87,7 +89,21 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 
 ## NODE
 
-1. Express App : `express()` creates a express app. This app remains common throught the application.
+1. **Express App** : `express()` creates a express app. This app remains common throught the application.
+
+   ```javascript
+   const express = require("express");
+   const app = express();
+
+   app.get("/", (req, res) => {
+     res.send({ hi: "there" });
+   });
+
+   const PORT = process.env.PORT || 5000;
+   app.listen(PORT);
+   ```
+
+2. **Passport** :
 
 ## REACT
 
