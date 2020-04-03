@@ -70,7 +70,20 @@ To create a web application which will collect feedback for a product. This appl
 
 4. **Remove intalled dependecies** : Add `node_modules` in .gitignore
 
-```
+### Deployment
+
+#### First Time
+
+1. `heroku -v`
+2. `heroku login`
+3. `heroku create` : Too create heroku app in heroku. It creates a repository like in our case it is **https://git.heroku.com/calm-meadow-57498.git**. It also assign a domain name and a bunch of other things.
+4. `git remote add heroku https://git.heroku.com/calm-meadow-57498.git` : This will add the newly create repo to our local with the name **heroku**.
+5. `git push heroku master` : to push the master branch code onto remote with the name heroku ie https://git.heroku.com/calm-meadow-57498.git. This will show you some debug information for heroku deployment.s
+6. `heroku open` : To open the app.
+
+#### Second Time Onwards
+
+You just need to do the 5th and 6th step. I you face any issue during the deployment you can use `heroku logs` to see the logs of the heroku deployment.
 
 ## NODE
 
@@ -81,4 +94,7 @@ To create a web application which will collect feedback for a product. This appl
 ## REDUX
 
 ## MONGO
+
+```
+
 ```
