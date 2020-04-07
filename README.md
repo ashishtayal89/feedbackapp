@@ -41,7 +41,21 @@ To create a web application which will collect feedback for a product. This appl
 
 ## Google OAuth(Express + MongoDB + PassportJS)
 
-### Architecture()
+### Architecture and Flow(02 > 003)
+
+Refer diagram `02 > 003`
+
+### Security Risk
+
+- Hackers can use this flow to get some user infromation which the user is not willing to share. One of the case is discussed below.
+- **Case**
+
+  1. A hacker send you a clickable image on your email saying `AirBnB offers.
+  2. Once you click this image it takes you to ``https://accounts.google.com/o/oauth2/v2/auth?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=airbnb.apps.googleusercontent.com`. Notice here redirect_uri is `http://localhost:5000/auth/google/callback` and clint_Id is `airbnb.apps.googleusercontent.com`. Since client_Id is public so anyone can send anyones clientId.
+  3. Not the user gets redirected to google oauth login page showing this is request from airbnb, whereas its redirect url is forget my hacker to his own website.
+  4. This way the user unknowing shares his profile info with the hacker.
+
+- To prevent this google first maps the redirect url with the list of url provided by airbnb in its account.
 
 ## Payment Gateway(Stripe + MongoDB)
 
@@ -104,6 +118,17 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
    ```
 
 2. **Passport** :
+   1. For this we install 2 libraries passport and passport strategy. `passport` is the generic oauth handling library for express app. We also install a strategy package which is specific to a provider. Eg `passport-google-oauth20` for google.
+   2. You need to pass a client Id and client secret to google. For that you need to register yourself with google. You can do that by visiting [this](http://console.developers.google.com).
+      - Then we create a new project.
+      - Now we enable `Google+ API`(This has now been depricated so no need for enabling).
+      - Then we create credentials for OAuth to get `client Id`(Public key) and `client secret`(Private key). Refer diagram `02 > 018` to see how we keep this private in production.
+      - Update OAuth consent screen.
+   3. `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=387595123288-p1afja9upeeicjbb9a7gk6neocio5941.apps.googleusercontent.com`
+      - response_type: code (This is to tell google to send the code for the user which will be used to fetch the profile)
+      - redirect_uri: http://localhost:5000/auth/google/callback
+      - scope: profile email(This tells the kind of permissions or information of user).
+      - client_id: 387595123288-p1afja9upeeicjbb9a7gk6neocio5941.apps.googleusercontent.com
 
 ## REACT
 
