@@ -87,6 +87,10 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`
      - **Security** : If some one gets access to you laptop which has all the keys then you have a great risk of loosing your prod env(GoogleAPI,DB etc). Also even if you accidently commit the keys in your code you don't need to worry since its only keys of dev env. You should always maintain the prod keys in which ever deployment platrom you are using(AWS,Azure,Heroku etc).
      - **Database** : For production we need an absolute clean set of data. For this reason it a must to have a dev database to do testing and development.
 
+  2. We maintain 2 separate files for dev and prod config namely `dev.js` and `prod.js` in the config folder. There is another file `keys.js` where we check if the environment in dev or prod and based on that return either dev or prod config. Heroku by default exposes the environment in the `NODE_ENV` variable.
+  3. dev.js keeps the config value in it whereas prod.js gets them from the environment variables.
+  4. We need to commit keys.js and prod.js so that they can also be deployed.
+
 - **MongoDB Atlas** :
 
 # Take Aways
