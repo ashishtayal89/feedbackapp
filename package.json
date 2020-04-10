@@ -16,7 +16,9 @@
   "author": "Ashish Tayal",
   "license": "ISC",
   "dependencies": {
+    "cookie-session": "^1.4.0",
     "express": "^4.15.3",
+    "mongoose": "^5.9.7",
     "nodemon": "^2.0.2",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0"
