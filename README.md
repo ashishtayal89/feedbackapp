@@ -93,6 +93,15 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`
 
 - **MongoDB Atlas** :
 
+- **Google callback protocal to https from http** : This issue we are facing is that a callback url `http://calm-meadow-57498.herokuapp.com/auth/google/callback` is being passed to google instead of `https://calm-meadow-57498.herokuapp.com/auth/google/callback`. This means the protocal being sent is http and not https even though we are at `https://calm-meadow-57498.herokuapp.com/`.
+
+- **Reason** :
+  1.  We are providing a relative callback path to GoogleStrategy.
+  2.  Refering the diagram(02 > 029) we can see that our application is running on one of the many server on heroku. They all are behing a proxy server of heroku. Due to this proxy server our google stategy feels that this network is not secure even though we are on https. Therefore it sends a http callbackn instead of https.
+- **Fix** :
+  1. Provide absolute callback url instead of relative url in google strategy. But for this you will have to keep them in config keys since this will change for diff env.
+  2. Proviide a `proxy:true` to google strategy.
+
 # Take Aways
 
 ## Heroku
