@@ -41,9 +41,13 @@ To create a web application which will collect feedback for a product. This appl
 
 ## Google OAuth(Express + MongoDB + PassportJS)
 
+### Complete Flow
+
+![Screenshot 2020-04-11 at 11 18 03 PM](https://user-images.githubusercontent.com/46783722/79050922-d919eb00-7c4a-11ea-8bf3-55a95126776a.png)
+
 ### Architecture and Flow(02 > 003)
 
-Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`
+Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
 
 1. User comes to our site and tries to login using google. He is taken to `http://localhost:5000/auth/google`.
 2. He is redirected to `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=airbnb.apps.googleusercontent.com`. Here he logs in using his id and password.
@@ -95,12 +99,53 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`
 
 - **Google callback protocal to https from http** : This issue we are facing is that a callback url `http://calm-meadow-57498.herokuapp.com/auth/google/callback` is being passed to google instead of `https://calm-meadow-57498.herokuapp.com/auth/google/callback`. This means the protocal being sent is http and not https even though we are at `https://calm-meadow-57498.herokuapp.com/`.
 
-- **Reason** :
-  1.  We are providing a relative callback path to GoogleStrategy.
-  2.  Refering the diagram(02 > 029) we can see that our application is running on one of the many server on heroku. They all are behing a proxy server of heroku. Due to this proxy server our google stategy feels that this network is not secure even though we are on https. Therefore it sends a http callbackn instead of https.
-- **Fix** :
-  1. Provide absolute callback url instead of relative url in google strategy. But for this you will have to keep them in config keys since this will change for diff env.
-  2. Proviide a `proxy:true` to google strategy.
+  - **Reason** :
+    1.  We are providing a relative callback path to GoogleStrategy.
+    2.  Refering the diagram(02 > 029) we can see that our application is running on one of the many server on heroku. They all are behing a proxy server of heroku. Due to this proxy server our google stategy feels that this network is not secure even though we are on https. Therefore it sends a http callback instead of https.
+  - **Fix** :
+    1. Provide absolute callback url instead of relative url in google strategy. But for this you will have to keep them in config keys since this will change for diff env.
+    2. Proviide a `proxy:true` to google strategy.
+
+- **Why 2 servers(03 > 012)** : Express server is only to serve the json. React server is ment to serve the assets. We could also use the express server to build our client and serve it, but it is a tedious task to setup webpack and create-react-app provides this out of the box.
+
+- **Concurently start client and server** : In the package.json of server we add below script.
+
+  ```javascript
+    "server": "nodemon index.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  ```
+
+- **Routing b/w client and server on dev** : This is only for development env. where we have 2 separate server for FE and BE.
+
+  1. **Problem Statement** : The user is currently at `http://localhost:3000/`. For google auth we need him to go to `http://localhost:5000/auth/google`. For this we need to provide the absolute url beause relative url will take him to `http://localhost:3000/auth/google`. But our domain will change for different env. One of the solution could be to check at build time if env is dev or not and based on that choose the domain. But this is an overload and additional task.
+
+  2. **Solution** :
+
+     1. Install package `yarn add http-proxy-middleware@0.21.0 --dev` in client directory.
+     2. Add file setupProxy.js in client/src folder and add below code
+
+  ```javascript
+  const proxy = require("http-proxy-middleware");
+  module.exports = function(app) {
+    app.use(
+      proxy(["/api", "/auth/google"], { target: "http://localhost:5000" })
+    );
+  };
+  ```
+
+  3. **Analysis**
+     Refering diagram `03 > 005`. For the relative url added in the setupProxy.js(auth/google, api) file, our client server(webpack server) acts as a proxy and sends the request to the server provided in the setupProxy.js(http://localhost:s5000).
+
+- **Why we didn't take 2 domain approach (03 > 008)** : We could also have taken an approach where we had 2 separate domain and hosting for our FE and BE application. But there is are reasons why we didn't take it :
+
+  1. **Cookie scope** : Refer diagram `02 > 013`. The scope of the cookie is limited to the domain. Since we are using a cookie based approach for authentication we can keep 2 separate domain since the cookie generated cann't be shared by domains by default. Although there are apis that allow us to share cookies accross domains but it is a tedious task.
+  2. **CORS** :
+
+  - **What is CORS?** : It stands for `cross origin resourse sharing`. This is again a security feature of the browser. If we try to make a request to a domain other than the one we are in, the browser assumes that there is something malicious and prevents this action.
+  - **Solution** :
+    1. To prevent the CORS issue we will need to make some additional changes in our server code. This will tell the browser which all domains are allow to access the server api.
+    2. Set `http://localhost:3000/` as a proxy for requests like `/api` or `/auth/google`. The browser assumes that the request is going to `http://localhost:3000/auth/google` whereas it is being relayed to `http://localhost:5000/auth/google`
 
 # Take Aways
 
