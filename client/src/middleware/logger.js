@@ -1,6 +1,8 @@
 function createLogMiddleware() {
   return () => next => action => {
-    console.log(action.type);
+    if (action.log) {
+      console.log(action);
+    }
     return next(action);
   };
 }
