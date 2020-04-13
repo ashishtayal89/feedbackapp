@@ -8,10 +8,10 @@ class AuthRoute extends Component {
   }
   render() {
     const { auth, ...rest } = this.props;
-    if (auth && auth.isFetching) {
+    if (auth.isFetching) {
       return "LOADING...";
     }
-    return auth ? <Route {...rest}></Route> : null;
+    return auth.data ? <Route {...rest}></Route> : <Redirect to="/" />;
   }
 }
 

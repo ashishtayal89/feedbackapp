@@ -10,10 +10,10 @@ import SurveyNew from "./surveys/SurveyNew";
 import AuthRoute from "./utils/AuthRoute";
 
 class App extends Component {
-  componentDidMount() {
+  constructor(props) {
+    super(props);
     this.props.fetchUser();
   }
-
   render() {
     return (
       <div className="container">
