@@ -106,7 +106,7 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
     1. Provide absolute callback url instead of relative url in google strategy. But for this you will have to keep them in config keys since this will change for diff env.
     2. Proviide a `proxy:true` to google strategy.
 
-- **Why 2 servers(03 > 012)** : Express server is only to serve the json. React server is ment to serve the assets. We could also use the express server to build our client and serve it, but it is a tedious task to setup webpack and create-react-app provides this out of the box.
+- **Why 2 servers(04 > 012)** : Express server is only to serve the json. React server is ment to serve the assets. We could also use the express server to build our client and serve it, but it is a tedious task to setup webpack and create-react-app provides this out of the box.
 
 - **Concurently start client and server** : In the package.json of server we add below script.
 
@@ -135,9 +135,9 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
   ```
 
   3. **Analysis**
-     Refering diagram `03 > 005`. For the relative url added in the setupProxy.js(auth/google, api) file, our client server(webpack server) acts as a proxy and sends the request to the server provided in the setupProxy.js(http://localhost:s5000).
+     Refering diagram `04 > 010`. For the relative url added in the setupProxy.js(auth/google, api) file, our client server(webpack server) acts as a proxy and sends the request to the server provided in the setupProxy.js(http://localhost:s5000).
 
-- **Why we didn't take 2 domain approach (03 > 008)** : We could also have taken an approach where we had 2 separate domain and hosting for our FE and BE application. But there is are reasons why we didn't take it :
+- **Why we didn't take 2 domain approach** : We could also have taken an approach where we had 2 separate domain and hosting for our FE and BE application. But there is are reasons why we didn't take it :
 
   1. **Cookie scope** : Refer diagram `02 > 013`. The scope of the cookie is limited to the domain. Since we are using a cookie based approach for authentication we can keep 2 separate domain since the cookie generated cann't be shared by domains by default. Although there are apis that allow us to share cookies accross domains but it is a tedious task.
   2. **CORS** :
@@ -151,7 +151,7 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
 
 ## Heroku
 
-### Checklist(02 > 017)
+### Deployment Checklist(02 > 017)
 
 1. **PORT** : Heroku defines the port at which our application will be able to listen to the incoming request. To enable our application to be able to listen to that port we use `const PORT = process.env.PORT`. Heroku sets the PORT to our environment variable.
 
@@ -217,7 +217,7 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
       - profile : User profile
 3. **done(err,arg)** : This is a function which is always the last argument of a middleware. This is invode to tell that the current middleware is done executing and you can load the next middleware. The first argument of this is always an error object followed by arguments.
 4. **app.use()** : This is used to wireup middlewares in the application.
-5. **Middleware** : Middlewares are functions that can be used to modify request before they are passed to route handlers. We can also say that middlewares are used to do some preprocessing of the incoming request before they are sent to the route handlers. Refer `02 > 04s`.
+5. **Middleware** : Middlewares are functions that can be used to modify request before they are passed to route handlers. We can also say that middlewares are used to do some preprocessing of the incoming request before they are sent to the route handlers. Refer `02 > 04`.
 6. **Cookie creation and handling using cookie-session and passport** :
 
    1. When the request comes back to our application(/auth/google/callback) from google, passport request google to share the profile based on the user code and then fires the callback function in the google strategy(See below code snippet). This validates if the user is new or old and then passes the user to the next middleware.
@@ -278,6 +278,17 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 7. **cookie-session vs express-session(02 > 012)** : For cookie-session the complete user info is kept inside the cookie whereas for express-session on an Id refered as the sessionId is kept in the cookie. This sessionId is then used to extract furter info about the user form some storage(DB). Cookie has a limitation of 4KB so if you have a lot of user info that needs to be part of the session please go for express-session.
 
 ## REACT
+
+### React Basic
+
+### React Router
+
+### Redux
+
+### Anonymous
+
+1. **mapDispatchToProps** : Allows us to excapsulate the dispatch action at a common place. It can be an object or a function. Please refer [this](https://react-redux.js.org/using-react-redux/connect-mapdispatch) for detailed understanding.
+2. **middleware** : We can add middleware to a store using addMiddleware. These are like a chain of callbacks which are fired one after the other and finaly the reducers are fired.
 
 ## EXPRESS
 
