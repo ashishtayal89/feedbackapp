@@ -233,6 +233,24 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 
 1. **heroku logs** : To see the logs if anything goes wrong in deployment.
 
+### Deployment Errors
+
+1. If your Heroku deployment fails and you see some errors in your logs like this:
+
+   remote: SyntaxError: Unexpected token ...
+
+   or something related to the @hapi module, this typically means that there is a mismatch between the Node version used locally and the version Heroku is attempting to use. It can also mean that an outdated version is specified in the engines property of the package.json.
+
+   To resolve this:
+
+   1. Delete the package-lock.json file on both the client and server
+
+   2. Make sure that you are using at least the LTS version of Node locally
+
+   3. Make sure your local Node version matches what is shown in the package.json file's engines property.
+
+   4. Run the git add . , git commit -m "fixing versions" and git push heroku master commands to force a rebuild.
+
 ## NODE
 
 1. **Express App** : `express()` creates a express app. This app remains common throught the application.
