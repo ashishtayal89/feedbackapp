@@ -1,8 +1,12 @@
 const passport = require("passport");
+const requireLogin = require("../middlewares/requireLogin");
+const isLoggedOut = require("../middlewares/isLoggedOut");
+const { filterUserFields } = require("../utils/responseUtils");
 
 module.exports = app => {
   app.get(
     "/auth/google",
+    isLoggedOut,
     passport.authenticate("google", {
       scope: ["profile", "email"]
     })
@@ -10,6 +14,7 @@ module.exports = app => {
 
   app.get(
     "/auth/google/callback",
+    isLoggedOut,
     passport.authenticate("google"),
     (req, res) => {
       res.redirect("/dashboard");
@@ -17,10 +22,10 @@ module.exports = app => {
   );
 
   app.get("/api/current_user", (req, res) => {
-    res.send(req.user);
+    res.send(filterUserFields(req.user, ["id", "credits"]));
   });
 
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/logout", requireLogin, (req, res) => {
     req.logout();
     res.redirect("/");
   });
