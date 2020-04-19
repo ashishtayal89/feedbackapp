@@ -172,6 +172,27 @@ This diagram shows the flow of payments using stripe.
 
 - **require vs import** : In require you can add some amount of business logic before making a require call but in case of import you can do that.
 
+- **Routing in production**
+
+  1. On production there is only one server to serve both the client request(static resources) and the server request ie the api request.Please refer `04 > 008` for more clarification.
+  2. In order to serve our static file like js,css and index.html in production we need to write some extra code.
+     ```javascript
+     if (process.env.NODE_ENV === "production") {
+       // Express serve static assets in production like main.js
+       app.use(express.static("client/build"));
+       // Express will serve index.html if it doesn't recognize the route
+       const path = require("path");
+       app.get("*", (req, res) => {
+         res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+       });
+     }
+     ```
+  3. **Configure client build process in heroku deployment(04 > 009)** :
+     - **Option 1** : Build client on local. Commit the files and push it to heroku. This is not prefered since this makes us commit the build files in your git repository. Also this increase a lot of manual effort to build it every time before deployment.
+     - **Option 2** : Make heroku do the build process. The downside to this approch is that by this we are making heroku install all the package like webpack, babel etc which are only needed for development. This is the apporach we are taking for our project. Refer `04 > 010` for flow.
+     - **Option 3** : This is the approach of CI or continuous integration. In this approach we make use of a third party server(CI server) to lint,test,build etc our project and then deploy that project to heroku. You can look in `circle ci` for this purpose.
+  4. **Making heroku install all dependency and then build our app** : Please refer heroku [https://devcenter.heroku.com/articles/nodejs-support#customizing-the-build-process](this) for detailed explanation.
+
 # Take Aways
 
 ## Heroku
@@ -207,6 +228,10 @@ This diagram shows the flow of payments using stripe.
 #### Second Time Onwards
 
 You just need to do the 5th and 6th step. I you face any issue during the deployment you can use `heroku logs` to see the logs of the heroku deployment.
+
+### Other Imp Commands
+
+1. **heroku logs** : To see the logs if anything goes wrong in deployment.
 
 ## NODE
 
@@ -331,7 +356,23 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 
 1. Express out of the box doesn't have any idea on how to handle cookies. So we install a helper library called `cookie-session`
 2. Express by default doesn't process the request payload/body like for a post request. For this we need to add another package like `body-parser` which parses the request body and provides it in the req.body object.
-3. **Route Specific Middleware** :
+3. **Route Specific Middleware** : For this you can add as many middlewares to the route handler. These middlewares are pushed in a queue and are fired one after the other with the help of `next`. Eg in the below code snipet we have added requireLogin as a middleware to first authenticate the route.
+   ```javascript
+   module.exports = app => {
+     app.post("/api/stripe", requireLogin, async (req, res) => {
+       console.log(req.body);
+       await stripe.charges.create({
+         amount: 500,
+         currency: "inr",
+         source: req.body.id,
+         description: "Pay for credits"
+       });
+       req.user.credits += 5;
+       const user = await req.user.save();
+       res.send(filterUserFields(user, ["id", "credits"]));
+     });
+   };
+   ```
 
 ## MONGO(No SQL database)
 
