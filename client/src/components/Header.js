@@ -5,7 +5,10 @@ import Payments from "./Payments";
 
 class Header extends Component {
   renderContent() {
-    const { data } = this.props.auth;
+    const { data, isFetching } = this.props.auth;
+    if (isFetching) {
+      return null;
+    }
     switch (data.id && Boolean(data.id)) {
       case true:
         return [
@@ -13,7 +16,7 @@ class Header extends Component {
             <Payments />
           </li>,
           <li key="3" style={{ margin: "0 10px" }}>
-            Credits: {this.props.auth.credits}
+            Credits: {data.credits}
           </li>,
           <li key="2">
             <a href="/api/logout">Logout</a>

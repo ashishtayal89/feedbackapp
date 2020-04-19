@@ -71,6 +71,29 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
 
 ## Payment Gateway(Stripe + MongoDB)
 
+### Rules of billing
+
+1. **Since we are bad at security** :
+   - Never accept raw credit card numbers
+   - Never store credit card numbers
+   - Always use an outside payment processor
+2. **Billing is hard** :
+   - Possible to avoid montly payment plans. Generaly it becomes difficult to maintain a billing system which is on a monthly basis. Let take a scenario where a user initialy takes a GENERAL plan with 50 emails a month and after sending 40 emails asks to upgrade the plan to PREMIUM which offers 100 emails a month. It becomes difficult to hande such a situation. Hence it is better to go for a credit based plan.
+   - Fraud and chargebacks are a pain. You are bound to have situation where some uses fraud credit card or a user made some payment by mistake. For all these circumstances you will need to have a roleback plan for billing which is a pain.
+
+### Flow(03 > 003)
+
+This diagram shows the flow of payments using stripe.
+
+### Dev
+
+1. First we create a account with stripe
+2. We get our public/publishable and secret keys
+3. We have used stripe checkout library for payment integration in frontend. There is a library `react-strip-checkout` which has been created on to of stripe checkout specificaly for react applications.
+4. We then create a StripeCheckout component and provide some props.
+5. `4242424242424242` is the test credit card number.
+6. For the backend we use the `stripe` library. We are using the `charges` api for processing the payment at the backend. Refer [https://stripe.com/docs/api/charges/create](this) link for more details.
+
 ## Campaign Creation(React + Redux)
 
 ## Email Survey(Email Provider)
@@ -147,6 +170,8 @@ Refer diagram `02 > 003`, `02 > 009`,`02 > 010`,`02 > 011`,
     1. To prevent the CORS issue we will need to make some additional changes in our server code. This will tell the browser which all domains are allow to access the server api.
     2. Set `http://localhost:3000/` as a proxy for requests like `/api` or `/auth/google`. The browser assumes that the request is going to `http://localhost:3000/auth/google` whereas it is being relayed to `http://localhost:5000/auth/google`
 
+- **require vs import** : In require you can add some amount of business logic before making a require call but in case of import you can do that.
+
 # Take Aways
 
 ## Heroku
@@ -215,7 +240,7 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
       - accessToken : It is of use if you have asked for so permissions which allow editing user info.
       - refreshToken : Used to create new accessToken incase it expires.
       - profile : User profile
-3. **done(err,arg)** : This is a function which is always the last argument of a middleware. This is invode to tell that the current middleware is done executing and you can load the next middleware. The first argument of this is always an error object followed by arguments.
+3. **done(err,arg)/next(err,arg)** : This is a function which is just like `next` but for passport. This is invode to tell that the current middleware is done executing and you can load the next middleware. The first argument of this is always an error object followed by arguments.
 4. **app.use()** : This is used to wireup middlewares in the application.
 5. **Middleware** : Middlewares are functions that can be used to modify request before they are passed to route handlers. We can also say that middlewares are used to do some preprocessing of the incoming request before they are sent to the route handlers. Refer `02 > 04`.
 6. **Cookie creation and handling using cookie-session and passport** :
@@ -232,7 +257,7 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
    };
    ```
 
-   2. The next middleware is defined in passport.serializeUser method. The result of the serializeUser method is attached to the session as `req.session.passport.user = sadfa234sfasfasf` which is nothing but user.id in the code below.
+   2. The next middleware is defined in passport.serializeUser method. The result of the serializeUser method is attached to the session as `req.session.passport.user = sadfa234sfasfasf` which is nothing but user.id in the code below. Remember this method is only fired once at the time of sign in and not on every request.
 
    ```javascript
    passport.serializeUser((user, done) => {
@@ -241,7 +266,17 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
    });
    ```
 
-   3. `cookie-session` see this added variable in the sessions, encrypts it and sends it as part of response header ie `Set-Cookie` key. cookie-session has a event handler which is fired incase of any change in req.session object.
+   3. After this the control moves to the next middleware defined for route `/auth/google/callback` as shown in the below code which redirect the user to the dashboard page. Before the response is sent back the `cookie-session` check req.session for any change, encrypts it and sends it as part of response header ie `Set-Cookie` key. cookie-session has a event handler which is fired incase of any change in req.session object.
+
+   ```javascript
+   app.get(
+     "/auth/google/callback",
+     passport.authenticate("google"),
+     (req, res) => {
+       res.redirect("/dashboard");
+     }
+   );
+   ```
 
    ```javascript
    app.use(
@@ -281,6 +316,8 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 
 ### React Basic
 
+- Creating env variables in react app for different environments like dev and prod. Refer [https://create-react-app.dev/docs/adding-custom-environment-variables/](this) link for details on how to set env variables. For our app we are using .env file.
+
 ### React Router
 
 ### Redux
@@ -293,6 +330,8 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 ## EXPRESS
 
 1. Express out of the box doesn't have any idea on how to handle cookies. So we install a helper library called `cookie-session`
+2. Express by default doesn't process the request payload/body like for a post request. For this we need to add another package like `body-parser` which parses the request body and provides it in the req.body object.
+3. **Route Specific Middleware** :
 
 ## MONGO(No SQL database)
 
