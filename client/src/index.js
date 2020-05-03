@@ -4,10 +4,12 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import App from "./components/App";
 import store from "./store";
+import axios from "axios";
 
 // Development only axios helpers!
-import axios from "axios";
-window.axios = axios;
+if (process.env.NODE_ENV == "development") {
+  window.axios = axios;
+}
 
 ReactDOM.render(
   <Provider store={store}>

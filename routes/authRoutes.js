@@ -1,7 +1,7 @@
 const passport = require("passport");
 const requireLogin = require("../middlewares/requireLogin");
 const isLoggedOut = require("../middlewares/isLoggedOut");
-const { filterUserFields } = require("../utils/responseUtils");
+const { filterFields } = require("../utils/responseUtils");
 
 module.exports = app => {
   app.get(
@@ -22,7 +22,7 @@ module.exports = app => {
   );
 
   app.get("/api/current_user", (req, res) => {
-    res.send(filterUserFields(req.user, ["id", "credits"]));
+    res.send(filterFields(req.user, ["id", "credits"]));
   });
 
   app.get("/api/logout", requireLogin, (req, res) => {
