@@ -37,7 +37,7 @@ To create a web application which will collect feedback for a product. This appl
 6. `02 > 017` : Heroku deployment checklists
 7. `02 > 016` : Heroku deployment
 
-# App Tech
+# Take Aways
 
 ## Google OAuth(Express + MongoDB + PassportJS)
 
@@ -96,7 +96,31 @@ This diagram shows the flow of payments using stripe.
 
 ## Campaign Creation(React + Redux)
 
+1. **Survey Routes** : Refer `05 > 002` for which all routes we have created for survey creation.
+
 ## Email Survey(Email Provider)
+
+1. **Process(`05 > 016`)** : In simple words these are the steps
+   - Create survey
+   - Create Email template
+   - Combine the 2 and send to api to trigger email
+2. **Approaches** :
+
+   1. Bad : (`05 > 017`) This is bad because here we are making a separate http request for each recipient to our email provider/sender.
+   2. Good : (`05 > 018`) This is good approach since we have batched our request to make 1 request for all the recipients to our email provider. The downside to this approach is that sincee we only have 1 mailer, we can't customize our mail specific to each recipient. All the recipients will get the email with the exact same content. So we will not be able to set `No` or `Yes` link to take the recipient to `emaily.com/surveys/feedback/123/no/agd@asdf.com`. This problem is handled by our email provider. Refer (`05 > 019`)
+
+3. **Email Provider** : We are using `sendGrid` as our email provider.
+   - **Sendgrid flow** : Refer (05 > 021)
+     1. We send a mailer to sendgrid.
+     2. Sendgrid checks for link and replaces with their own link
+     3. When user clicks sendgrid knows who clicked.
+     4. - User is sent to desired destination.
+        - Sendgrid sends a message to our server telling about the user action. This is know as webhooks
+   - **Create a sendgrid api key** :
+     1. Create an account with sendgrid. Generally different accounts are created for different environments but we are only creating 1.
+     2. Create an api key and test it using the `sendgrid-test` folder.
+   - **Test API** : In general we can use any tool like postman which can help us to create a request, but since we need to be authentication we can use it. We will use fetch or axios in the browser console to make these requests.
+   - **Gmail Issue** : When we send a mail using sendgrid to any gmail account, it check for the authentication of the sender. So in sendgrid you need to do domain authentication for the same. If you don't do this then the mail is sent to the recipients spam folder and any link is removed from the mail body. For this reason you can add a filter in you gmail to redirect spam comming from a particular sender to your inbox. This way gmail will not remove the anchor from the mail body.
 
 ## Tabulation and Report creation from survey(Email Provider + Express + Mongo + React + Redux)
 
@@ -193,7 +217,7 @@ This diagram shows the flow of payments using stripe.
      - **Option 3** : This is the approach of CI or continuous integration. In this approach we make use of a third party server(CI server) to lint,test,build etc our project and then deploy that project to heroku. You can look in `circle ci` for this purpose.
   4. **Making heroku install all dependency and then build our app** : Please refer heroku [https://devcenter.heroku.com/articles/nodejs-support#customizing-the-build-process](this) for detailed explanation.
 
-# Take Aways
+# App Tech
 
 ## Heroku
 
@@ -229,7 +253,7 @@ This diagram shows the flow of payments using stripe.
 
 You just need to do the 5th and 6th step. I you face any issue during the deployment you can use `heroku logs` to see the logs of the heroku deployment.
 
-### Other Imp Commands
+### Imp Commands
 
 1. **heroku logs** : To see the logs if anything goes wrong in deployment.
 
@@ -387,7 +411,7 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
        });
        req.user.credits += 5;
        const user = await req.user.save();
-       res.send(filterUserFields(user, ["id", "credits"]));
+       res.send(filterFields(user, ["id", "credits"]));
      });
    };
    ```
@@ -398,13 +422,17 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
    - What is mongoose doing for us is in diagram `02 > 007`. `Model class` in mongoose represents a mongo db collection. `Model instance` in monogoose represents a mongo db record.
    - Although mongo db is schema less but mongoose requeires a **Schema**.
 2. **How is data stored**(`02 > 006`) :
-   - **Collection**: Like tables in RDBMS. Eg users, payments
-   - **Records**s: Like rows in tables. Just the difference is that in RDBMS all the rows have same columns or fields. Whereas 2 records may have same of different fields. This is why we call monogdb a **schema less** database.
+   - **Collection**: Like tables in RDBMS. Eg users, payments. You create a collection using a mongoose schema.
+   - **Records/Document**: Like rows in tables. Just the difference is that in RDBMS all the rows always have same columns or fields. Whereas 2 records may have same of different fields. This is why we call monogdb a **schema less** database. You create a document using a mongoose model.
 3. All CRUD operations are async. Eg
+
    ```javascript
    new User({ googleID: profile.id }).save();
    ```
 
-```
-
-```
+4. **Subdocument collection** : This can be considered as a collection inside another collection. This is used when we want to make a close association between 2 collections ie the 2 collections are very tightly coupled. For instance in our case we have **surveys** and **reciepients** tightly coupled. This has pros as well as some cons.
+   - **Pro** : It help to quikly get all the information related to one record inside the record itself.
+   - **Cons** :
+     1. It is perfomance inefficiet to analyse the information of the subdocument. If we need to query all the subdocument then it becomes a difficult task.
+     2. Each document has a memory limit of 4MB, so we should always see that the size of each document should not exceed whenever we try to create a subdocument.
+   - **How to create** : By passing a schema to another schema.
