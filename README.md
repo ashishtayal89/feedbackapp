@@ -389,6 +389,8 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
 
 ### Redux
 
+- **Redux form** : We need to pass an `onSubmit` handler to our redux form component which is fired on form submit. If we forget to pass this prop then we need to pass a callback in `handleSubmit` in our form tag. Please refer [this](https://stackoverflow.com/questions/43966804/how-to-handlesubmit-with-a-redux-form) article for better understanding.
+
 ### Anonymous
 
 1. **mapDispatchToProps** : Allows us to excapsulate the dispatch action at a common place. It can be an object or a function. Please refer [this](https://react-redux.js.org/using-react-redux/connect-mapdispatch) for detailed understanding.

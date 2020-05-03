@@ -8,4 +8,7 @@ const filterFields = (data = {}, fields) => {
   return null;
 };
 
-module.exports = { filterFields };
+const filterListFields = (list = [], fields) =>
+  list.map(item => filterFields(item, fields));
+
+module.exports = { filterFields, filterListFields };
