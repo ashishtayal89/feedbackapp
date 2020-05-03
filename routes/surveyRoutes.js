@@ -3,7 +3,7 @@ const requireCredits = require("../middlewares/requireCredits");
 const mongoose = require("mongoose");
 const Mailer = require("../services/Mailer");
 const surveyTemplate = require("../services/emailTemplates/surveyTemplates");
-const { filterFields } = require("../utils/responseUtils");
+const { filterFields, filterListFields } = require("../utils/dataParser");
 
 const Survey = mongoose.model("surveys");
 
@@ -33,7 +33,10 @@ module.exports = app => {
       });
     }
   });
-  app.get("/api/surveys", (req, res) => {
-    res.send("Thanks for the feedback");
+  app.get("/api/surveys", async (req, res) => {
+    const surveys = await Survey.find({ _user: req.user.id });
+    return res.send(
+      filterListFields(surveys, ["id", "body", "yes", "no", "dateSent"])
+    );
   });
 };

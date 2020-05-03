@@ -1,7 +1,7 @@
 const passport = require("passport");
 const requireLogin = require("../middlewares/requireLogin");
 const isLoggedOut = require("../middlewares/isLoggedOut");
-const { filterFields } = require("../utils/responseUtils");
+const { filterFields } = require("../utils/dataParser");
 
 module.exports = app => {
   app.get(

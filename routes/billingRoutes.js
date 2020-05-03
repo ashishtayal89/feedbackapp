@@ -1,5 +1,5 @@
 const keys = require("../config/keys");
-const { filterFields } = require("../utils/responseUtils");
+const { filterFields } = require("../utils/dataParser");
 const requireLogin = require("../middlewares/requireLogin");
 const stripe = require("stripe")(keys.stripeSecretKey);
 
