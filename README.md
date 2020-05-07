@@ -1,3 +1,10 @@
+# Running on local
+
+1. `npm i`
+2. Go to client folder and do `npm i`
+3. Run `npm run dev:webhook` which will open a terminal. Copy the domain in the terminal and add it to your sendgrid.
+4. Run `npm run dev`
+
 # Objective
 
 To create a web application which will collect feedback for a product. This application can be marketed to different companies with diverse products for which they can be charged.
@@ -94,11 +101,7 @@ This diagram shows the flow of payments using stripe.
 5. `4242424242424242` is the test credit card number.
 6. For the backend we use the `stripe` library. We are using the `charges` api for processing the payment at the backend. Refer [https://stripe.com/docs/api/charges/create](this) link for more details.
 
-## Campaign Creation(React + Redux)
-
-1. **Survey Routes** : Refer `05 > 002` for which all routes we have created for survey creation.
-
-## Email Survey(Email Provider)
+## Campaign Creation and Email Survey(Email Provider)
 
 1. **Process(`05 > 016`)** : In simple words these are the steps
    - Create survey
@@ -121,8 +124,55 @@ This diagram shows the flow of payments using stripe.
      2. Create an api key and test it using the `sendgrid-test` folder.
    - **Test API** : In general we can use any tool like postman which can help us to create a request, but since we need to be authentication we can use it. We will use fetch or axios in the browser console to make these requests.
    - **Gmail Issue** : When we send a mail using sendgrid to any gmail account, it check for the authentication of the sender. So in sendgrid you need to do domain authentication for the same. If you don't do this then the mail is sent to the recipients spam folder and any link is removed from the mail body. For this reason you can add a filter in you gmail to redirect spam comming from a particular sender to your inbox. This way gmail will not remove the anchor from the mail body.
+4. **Survey Routes** : Refer `05 > 002` for which all routes we have created for survey creation.
+5. **Webhook for survey response** :
 
-## Tabulation and Report creation from survey(Email Provider + Express + Mongo + React + Redux)
+   - **What is webhook** : Webhook is when one server sends some message to another server because of some event that occured on the first one. How sendgrid uses webhooks to communicate to us.
+     ![Screenshot 2020-05-05 at 11 17 12 PM](https://user-images.githubusercontent.com/46783722/81098273-c7182900-8f26-11ea-9ff1-9b6c7353fcf3.png)
+   - **Prod vs Dev** : It becomes diffult to use webhooks in dev/local env since we don't have a public domain where the request can be made. Refer `07 > 002` and `07 > 003` for better clarity.
+   - **How to resolve Dev setup issue** : We use a third party module called **localtunnel** which helps us resolve this issue. Basicly we setup a localtunnel server on our local system. This server continuasly talk to it web server something like **abc.localtunnel.com**. We ask sendgrid to send the webhook notification to this webserver which communicates it to our localtunnel server. Refer `07 > 004` for better understanding.
+   - **Why and how to use Ngrok instead of localtunnel** :
+     This note will cover using Ngrok instead of LocalTunnel, which has proven to be buggy and inconsistent since the course lectures were originally recorded.
+     **Setting Up Ngrok**
+     We can use npx to run ngrok and have it forward traffic to port 5000 without installing anything. To do this, open a brand new terminal and run:
+     `npx ngrok http 5000`
+     This will launch up a pop-up window with the address you can use:
+
+     This address that was generated, in my case: https://ed3ce60.ngrok.io will only exist for 8 hours. You'll want to keep this terminal session open and running while you are developing. If you close the running ngrok session and re-run npx ngrok http 5000, the address will be different. It is important to remember these two things as you will likely need to update the ngrok generated address in your Sendgrid dashboard a few times through the development process.
+
+     Since we are not using LocalTunnel, we also don't need the webhook script in our package.json file as noted in the "LocalTunnel Setup" lecture video. We also don't need to call the 'webhook' script from the 'dev' script.
+
+     The scripts property should now look like this:
+
+     ```javascript
+     "scripts": {
+     "start": "node index.js",
+     "server": "nodemon index.js",
+     "client": "npm run start --prefix client",
+     "dev": "concurrently \"npm run server\" \"npm run client\"",
+     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
+     },
+     ```
+
+     Sendgrid Integration
+     In the upcoming lecture "Testing Webhooks", you will be adding your LocalTunnel address to the Event Notification's HTTP POST URL field. Since we are going to use Ngrok, you'll want to paste the current session's address into this field instead:
+
+     Remember, anytime you start a new ngrok session, you'll need to update this HTTP POST URL field.
+
+     You should be able to then click the "Test Your Integration" button. If it's working, you might get some data from Sendgrid or an error in your terminal like this:
+
+     [0] TypeError [ERR_INVALID_URL]: Invalid URL: undefined
+
+     This is fine, as it does prove the integration is working and is sending data through ngrok to your application.
+
+     A quick note about production, since this has been a major topic of confusion. The Ngrok session (and the LocalTunnel usage from the videos) are development only. These tools only serve to allow Sendgrid to post back to your application running on localhost. If you were to deploy your finished application to Heroku and users filled out a survey, the Sendgrid integration for click tracking would post directly to your Heroku application at https://your_heroku_url/api/surveys/webhooks
+
+   - **Add post Url to sendgrid** : We need to tell sendgrid that where it needs to send the notification for user click action. So we add the url `http://855c592a.ngrok.io/api/surveys/webhooks` in the sendgrid mail setting section. This domain was generate by `npm ngrok http 500`.
+     ![Screenshot 2020-05-06 at 12 03 02 AM](https://user-images.githubusercontent.com/46783722/81102276-077aa580-8f2d-11ea-8027-5bb09ee1efad.png)
+   - **Issue with webhook data** : The data from sendgrid has some issues as mentioned below which we solve by filtring out values using a `filterSurvey.js`.
+     1. If user click multiple time then we will get multiple entries for his feedback in our webhook data.But we only need unique entry for each user.
+     2. There might be entries for some other events like open or bounce.
+     3. There might be entries for some other url click like some external third parth link. So we only need to capture the entries specific to the url which has survey and feedback in its url
 
 ## Anonymous
 
@@ -413,7 +463,7 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
        });
        req.user.credits += 5;
        const user = await req.user.save();
-       res.send(filterFields(user, ["id", "credits"]));
+       res.send(filterDataFields(user, ["id", "credits"]));
      });
    };
    ```
@@ -438,3 +488,21 @@ You just need to do the 5th and 6th step. I you face any issue during the deploy
      1. It is perfomance inefficiet to analyse the information of the subdocument. If we need to query all the subdocument then it becomes a difficult task.
      2. Each document has a memory limit of 4MB, so we should always see that the size of each document should not exceed whenever we try to create a subdocument.
    - **How to create** : By passing a schema to another schema.
+5. **Good and Bad practice for mongo query** :
+   - **Bad** : In the below code example we are trying to add recipients feedback for the survey. The issue in this is that initialy we are fething the complete survey with the list of all the recipients which are giving that survey even though we don't need the data for all of them. Similarly we are saving the complete survey with all the recipients even though we need to update it only for 1 recipient.
+   - **Good** : The below code snippet is a good way of doing this thing where we create a query which is executed in mondodb itself.
+     ```javascript
+     Survey.updateOne(
+       {
+         _id: surveyId,
+         recipients: {
+           $elemMatch: { email: email, responded: false }
+         }
+       },
+       {
+         $inc: { [choice]: 1 },
+         $set: { "recipients.$.responded": true },
+         lastResponded: new Date()
+       }
+     ).exec();
+     ```

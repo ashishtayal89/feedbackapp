@@ -1,9 +1,14 @@
+const _ = require("lodash");
+const mongoose = require("mongoose");
 const requireLogin = require("../middlewares/requireLogin");
 const requireCredits = require("../middlewares/requireCredits");
-const mongoose = require("mongoose");
+const filterSurveys = require("../middlewares/filterSurveys");
 const Mailer = require("../services/Mailer");
 const surveyTemplate = require("../services/emailTemplates/surveyTemplates");
-const { filterFields, filterListFields } = require("../utils/dataParser");
+const {
+  filterDataFields,
+  filterDataListFields
+} = require("../utils/dataParser");
 
 const Survey = mongoose.model("surveys");
 
@@ -24,7 +29,7 @@ module.exports = app => {
       await survey.save();
       req.user.credits -= 1;
       const user = await req.user.save();
-      return res.send(filterFields(user, ["id", "credits"]));
+      return res.send(filterDataFields(user, ["id", "credits"]));
     } catch (e) {
       console.log(e);
       return res.status(500).send({
@@ -36,7 +41,28 @@ module.exports = app => {
   app.get("/api/surveys", async (req, res) => {
     const surveys = await Survey.find({ _user: req.user.id });
     return res.send(
-      filterListFields(surveys, ["id", "body", "yes", "no", "dateSent"])
+      filterDataListFields(surveys, ["id", "body", "yes", "no", "dateSent"])
     );
+  });
+  app.get("/api/surveys/:surveyId/:choice", (req, res) => {
+    res.send("Thank you for your feedback");
+  });
+  app.post("/api/surveys/webhooks", filterSurveys, (req, res) => {
+    _.forEach(req.body, ({ surveyId, email, choice }) => {
+      Survey.updateOne(
+        {
+          _id: surveyId,
+          recipients: {
+            $elemMatch: { email: email, responded: false }
+          }
+        },
+        {
+          $inc: { [choice]: 1 },
+          $set: { "recipients.$.responded": true },
+          lastResponded: new Date()
+        }
+      ).exec();
+    });
+    res.send({});
   });
 };

@@ -1,5 +1,5 @@
 const keys = require("../config/keys");
-const { filterFields } = require("../utils/dataParser");
+const { filterDataFields } = require("../utils/dataParser");
 const requireLogin = require("../middlewares/requireLogin");
 const stripe = require("stripe")(keys.stripeSecretKey);
 
@@ -13,6 +13,6 @@ module.exports = app => {
     });
     req.user.credits += 5;
     const user = await req.user.save();
-    res.send(filterFields(user, ["id", "credits"]));
+    res.send(filterDataFields(user, ["id", "credits"]));
   });
 };
