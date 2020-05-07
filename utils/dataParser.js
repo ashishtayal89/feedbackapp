@@ -1,4 +1,4 @@
-const filterFields = (data = {}, fields) => {
+const filterDataFields = (data = {}, fields) => {
   if (data && fields.length > 0) {
     return fields.reduce((filteredData, field) => {
       filteredData[field] = data[field];
@@ -8,7 +8,7 @@ const filterFields = (data = {}, fields) => {
   return null;
 };
 
-const filterListFields = (list = [], fields) =>
-  list.map(item => filterFields(item, fields));
+const filterDataListFields = (list = [], fields) =>
+  list.map(item => filterDataFields(item, fields));
 
-module.exports = { filterFields, filterListFields };
+module.exports = { filterDataFields, filterDataListFields };
